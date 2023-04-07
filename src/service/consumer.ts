@@ -1,24 +1,25 @@
 var soap = require("soap")
-
+import { parseJson, getCredentials } from "utils";
 type Auth = {
     user: string,
     password: string
 }
 
-export default function consumeReport(client: any, reportPath: string, params: any, credentials: Auth) {
+export default function consumeReport(client: any, reportPath: string, params: any) {
     let args = {
         reportRequest: {
             attributeFormat: 'xml', reportAbsolutePath: reportPath, sizeOfDataChunkDownload: "-1",
             parameterNameValues: params
         }
     }
+
     return new Promise((resolve, reject) => {
-        client.setSecurity(new soap.BasicAuthSecurity(credentials.user, credentials.password));
-        client.runReport(args, function (err: any, result: any) {
+        client.setSecurity(new soap.BasicAuthSecurity(getCredentials().user, getCredentials().password));
+        client.runReport(args, async function (err: any, result: any) {
             if (err) {
                 reject(err)
             } else {
-                resolve(Buffer.from(result.runReportReturn.reportBytes, 'base64').toString('ascii'))
+                resolve(await parseJson(Buffer.from(result.runReportReturn.reportBytes, 'base64').toString('ascii')))
             }
         });
     })

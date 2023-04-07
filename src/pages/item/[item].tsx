@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import Head from 'next/head'
 import { Grid } from "semantic-ui-react";
-import { Image, Text, Textarea, Table, Button, Tooltip, Grid as Gr } from "@nextui-org/react";
+import { Image, Text, Textarea, Table, Button, Tooltip, Grid as Gr,Loading } from "@nextui-org/react";
 import { AiOutlinePlusCircle, AiOutlineCloseCircle, AiFillSave } from "react-icons/ai";
 import ModalBasic from '@components/Modal';
 import UploadFile from '@components/UploadFile';
 
 const Item = () => {
     const [visible, setVisible] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     function openModal() {
         setVisible(true);
@@ -25,9 +26,9 @@ const Item = () => {
                     <Grid.Column width={2}>
                         <Button
                             color="success"
-                            icon={<AiFillSave />}
+                            icon={loading ? null : <AiFillSave />}
                             auto>
-                            Guardar
+                                {loading ? <Loading type="points" color="currentColor" size="sm" /> : "Guardar"}
                         </Button>
                     </Grid.Column>
                     <Grid.Column width={2}>

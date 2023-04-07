@@ -1,16 +1,68 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Head from 'next/head'
-import { Input, Button, Table, Text, Tooltip, Grid as Gr } from "@nextui-org/react";
+import { Input, Button, Table, Text, Tooltip, Grid as Gr, Loading } from "@nextui-org/react";
 import { Grid } from "semantic-ui-react"
 import { AiFillFileExcel, AiOutlinePlusCircle, AiOutlineCloseCircle } from "react-icons/ai";
 import { FaSistrix } from "react-icons/fa"
 import ModalBasic from '@components/Modal';
 import CreateItem from "@components/CreateItem";
+import { createApi } from "service/rest";
 
 export default function Home() {
   const [visible, setVisible] = useState(false);
+  const [dataClassItem, setDataClassItem] = useState<any>([]);
+  const [clientApi, setClientApi] = useState<any>(null)
+  const [searchData, setSearchData] = useState({
+    lang: "US",
+    itm: "",
+    desc: ""
+  });
+  const [loadSearch, setLoadSearch] = useState(false);
+  const [dataTable, setDataTable] = useState<Array<iItems>>([])
 
 
+  useEffect(() => {
+    let api: any = createApi("/api");
+    setClientApi(api)
+  }, [])
+
+
+  useEffect(() => {
+    if (clientApi !== null) {
+      (async () => {
+        let arrTemp: any = [];
+
+        let f: Array<ClassLov> = await clientApi.getlovs('ESA');
+        //console.log(await api.items(null, "AS85022"))
+        f.map((x) => {
+          return arrTemp.push({
+            key: x.PROP,
+            text: x.TEXT,
+            value: x.CODE
+          })
+        })
+        setDataClassItem(arrTemp)
+      })()
+    }
+  }, [clientApi])
+
+
+  function handlerChange(e: any) {
+    const { name, value } = e.target;
+    setSearchData({
+      ...searchData,
+      [name]: value
+    })
+  }
+
+  async function searchItems() {
+    if (!loadSearch) {
+      setLoadSearch(true);
+      let result = await clientApi.items(searchData.lang, searchData.itm, searchData.desc);
+      setDataTable(result)
+      setLoadSearch(false)
+    }
+  }
   return (
     <>
       <Head>
@@ -28,7 +80,7 @@ export default function Home() {
               <Grid>
                 <Grid.Row>
                   <Grid.Column width={7}>
-                    <Input clearable bordered labelPlaceholder="Item" size="lg" fullWidth />
+                    <Input clearable bordered labelPlaceholder="Item" name="itm" size="lg" fullWidth onChange={handlerChange} />
                   </Grid.Column>
                   <Grid.Column width={7}>
                     <Input clearable bordered labelPlaceholder="Keyword" size="lg" fullWidth />
@@ -36,7 +88,7 @@ export default function Home() {
                 </Grid.Row>
                 <Grid.Row>
                   <Grid.Column width={14}>
-                    <Input clearable bordered labelPlaceholder="Descripcion" size="lg" fullWidth />
+                    <Input clearable bordered labelPlaceholder="Descripcion" name="desc" size="lg" fullWidth onChange={handlerChange} />
                   </Grid.Column>
                 </Grid.Row>
               </Grid>
@@ -50,9 +102,11 @@ export default function Home() {
                     <Button
                       color="success"
                       auto size="lg"
-                      icon={<FaSistrix />}
+                      icon={loadSearch ? null : <FaSistrix />}
+                      onClick={searchItems}
                     >
-                      Buscar
+                      {loadSearch ? <Loading type="points" color="currentColor" size="sm" /> : "Buscar"}
+
                     </Button>
                   </Grid.Column>
                   <Grid.Column width={5}>
@@ -132,14 +186,16 @@ export default function Home() {
                   Unidad de medida
                 </Table.Column>
               </Table.Header>
-              <Table.Body>
-                <Table.Row>
-                  <Table.Cell>line1</Table.Cell>
-                  <Table.Cell>line2</Table.Cell>
-                  <Table.Cell>line3</Table.Cell>
-                  <Table.Cell>line2</Table.Cell>
-                  <Table.Cell>line3</Table.Cell>
-                </Table.Row>
+              <Table.Body items={dataTable}>
+                {(x) => (
+                  <Table.Row key={x.INVENTORY_ITEM_ID}>
+                    <Table.Cell>{x.ITEM_NUMBER}</Table.Cell>
+                    <Table.Cell>{x.DESCRIPTION}</Table.Cell>
+                    <Table.Cell>{x.ORGANIZATION_NAME}</Table.Cell>
+                    <Table.Cell>clase buscar</Table.Cell>
+                    <Table.Cell>{x.CURRENT_PHASE_CODE}</Table.Cell>
+                  </Table.Row>
+                )}
               </Table.Body>
             </Table>
           </Grid.Column>
@@ -150,7 +206,7 @@ export default function Home() {
         closeHandler={setVisible}
         textAcep="Crear"
         title='Crear Item'
-        children={<CreateItem />}
+        children={<CreateItem data={dataClassItem} />}
       />
     </>
   )

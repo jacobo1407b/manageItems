@@ -5,15 +5,9 @@ declare global {
      * Now declare things that go in the global namespace,
      * or augment existing declarations in the global namespace.
      */
-    interface Item {
-        item: string,
-        url: string,
-        description: string,
-        org: string,
-        clas: string,
-        uom: string,
-        IdErp: string,
-        id: number
+
+    interface iProxy {
+        getlovs: function
     }
 
     interface Busqueda {
@@ -38,5 +32,24 @@ declare global {
         text: string,
         value: string
     }
+
+    interface ClassLov {
+        PROP: string,
+        TEXT: string,
+        CODE: string
+    }
     type Selection = Array<Select>
+
+    export interface iItems {
+        CREATION_DATE: string
+        ORGANIZATION_NAME: string
+        INVENTORY_ITEM_ID: string
+        INVENTORY_ITEM_STATUS_CODE: string
+        APPROVAL_STATUS: string
+        CREATED_BY: string
+        CURRENT_PHASE_CODE: string
+        ITEM_NUMBER: string
+        DESCRIPTION: string
+        LONG_DESCRIPTION: string
+    }
 }

@@ -1,9 +1,11 @@
-import React from 'react'
+import React, { FunctionComponent } from 'react'
 import { Input, Button, Table, Text, Tooltip, Row } from "@nextui-org/react";
 import { Grid, Select } from "semantic-ui-react";
 
-
-const CreateItem = () => {
+interface iCreate {
+    data: any
+}
+const CreateItem: FunctionComponent<iCreate> = ({ data }) => {
     return (
         <>
             <Row justify="space-between">
@@ -12,11 +14,11 @@ const CreateItem = () => {
             </Row>
             <Row justify="space-between">
                 <Text size={20} h3>Numero Items</Text>
-                <Input clearable placeholder="Numero items" size="lg"  initialValue="" />
+                <Input clearable placeholder="Numero items" size="lg" initialValue="" />
             </Row>
             <Row justify="space-between">
                 <Text size={20} h3>Item class</Text>
-                <Select placeholder='Select your country' options={[]} />
+                <Select placeholder='Select your country' options={data} />
             </Row>
             <Grid>
                 <Grid.Column width={7}>
