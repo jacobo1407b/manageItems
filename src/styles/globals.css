@@ -10,3 +10,8 @@
     background-color: transparent;
     border: none;
 }
+
+.toast-container {
+    left: 0 !important;
+    right: 0 !important;
+  }

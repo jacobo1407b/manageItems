@@ -1,6 +1,6 @@
-import {useState} from "react"
 import type { AppProps } from 'next/app'
-
+import { SSRProvider } from '@react-aria/ssr';
+import { Toaster } from 'react-hot-toast';
 import { NextUIProvider, createTheme } from '@nextui-org/react';
 
 import "../styles/globals.css"
@@ -16,11 +16,15 @@ const theme = createTheme({
 export default function App({ Component, pageProps }: AppProps) {
 
   return (
-    <NextUIProvider theme={theme}>
-      <div className='layout-jhm'>
-        <Component {...pageProps} />
-      </div>
-    </NextUIProvider>
+    <>
+      <NextUIProvider theme={theme}>
+        <div className='layout-jhm'>
+          <Component {...pageProps} />
+        </div>
+      </NextUIProvider>
+      <Toaster  containerClassName="toast-container" />
+    </>
+
   )
 
 

@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react"
-import Head from 'next/head'
-import { Input, Button, Table, Text, Tooltip, Grid as Gr, Loading } from "@nextui-org/react";
-import { Grid } from "semantic-ui-react"
+import Head from 'next/head';
+import Link from 'next/link'
+import { Input, Button, Text, Tooltip, Grid as Gr, Loading } from "@nextui-org/react";
+import { Grid, Table } from "semantic-ui-react"
 import { AiFillFileExcel, AiOutlinePlusCircle, AiOutlineCloseCircle } from "react-icons/ai";
 import { FaSistrix } from "react-icons/fa"
 import ModalBasic from '@components/Modal';
 import CreateItem from "@components/CreateItem";
 import { createApi } from "service/rest";
+import { exportXlsx } from "utils"
+import toast from 'react-hot-toast';
 
 export default function Home() {
   const [visible, setVisible] = useState(false);
@@ -32,7 +35,7 @@ export default function Home() {
       (async () => {
         let arrTemp: any = [];
 
-        let f: Array<ClassLov> = await clientApi.getlovs('ESA');
+        let f: Array<ClassLov> = await clientApi.getlovs('US');
         //console.log(await api.items(null, "AS85022"))
         f.map((x) => {
           return arrTemp.push({
@@ -55,12 +58,31 @@ export default function Home() {
     })
   }
 
+  function resetFormSearch() {
+    setSearchData({
+      ...searchData,
+      itm: "",
+      desc: ""
+    });
+    setDataTable([])
+  }
+
   async function searchItems() {
-    if (!loadSearch) {
+    if (!searchData.itm && !searchData.desc) {
+      toast.error("Agrega un parametro de busqueda")
+    } else if (loadSearch !== true) {
       setLoadSearch(true);
       let result = await clientApi.items(searchData.lang, searchData.itm, searchData.desc);
       setDataTable(result)
       setLoadSearch(false)
+    }
+  }
+
+  function exportData() {
+    if (!dataTable || dataTable.length === 0) {
+      toast.error("No data to export")
+    } else {
+      exportXlsx(dataTable)
     }
   }
   return (
@@ -76,23 +98,41 @@ export default function Home() {
         <Grid.Row columns={2}>
 
           <Grid.Column width={11}>
-            <>
-              <Grid>
-                <Grid.Row>
-                  <Grid.Column width={7}>
-                    <Input clearable bordered labelPlaceholder="Item" name="itm" size="lg" fullWidth onChange={handlerChange} />
-                  </Grid.Column>
-                  <Grid.Column width={7}>
-                    <Input clearable bordered labelPlaceholder="Keyword" size="lg" fullWidth />
-                  </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                  <Grid.Column width={14}>
-                    <Input clearable bordered labelPlaceholder="Descripcion" name="desc" size="lg" fullWidth onChange={handlerChange} />
-                  </Grid.Column>
-                </Grid.Row>
-              </Grid>
-            </>
+
+            <Grid>
+              <Grid.Row>
+                <Grid.Column width={7}>
+                  <Input
+                    clearable
+                    bordered
+                    labelPlaceholder="Item"
+                    name="itm"
+                    value={searchData.itm}
+                    defaultValue={searchData.itm}
+                    size="lg"
+                    fullWidth
+                    onChange={handlerChange} />
+                </Grid.Column>
+                <Grid.Column width={7}>
+                  <Input clearable bordered labelPlaceholder="Keyword" size="lg" fullWidth />
+                </Grid.Column>
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column width={14}>
+                  <Input
+                    clearable
+                    bordered
+                    labelPlaceholder="Descripcion"
+                    name="desc"
+                    value={searchData.desc}
+                    defaultValue={searchData.desc}
+                    size="lg"
+                    fullWidth
+                    onChange={handlerChange} />
+                </Grid.Column>
+              </Grid.Row>
+            </Grid>
+
           </Grid.Column>
           <Grid.Column width={5}>
             <>
@@ -103,7 +143,7 @@ export default function Home() {
                       color="success"
                       auto size="lg"
                       icon={loadSearch ? null : <FaSistrix />}
-                      onClick={searchItems}
+                      onPress={searchItems}
                     >
                       {loadSearch ? <Loading type="points" color="currentColor" size="sm" /> : "Buscar"}
 
@@ -114,6 +154,7 @@ export default function Home() {
                       color="error"
                       auto
                       size="lg"
+                      onPress={resetFormSearch}
                       icon={<AiOutlineCloseCircle />}
                     >
                       Resetear
@@ -131,16 +172,16 @@ export default function Home() {
               <Text h6>Acciones:</Text>
             </Gr>
             <Gr>
-
               <Tooltip content="Exportar a excel" color="success" placement="right">
-                <Button auto light>
+                <Button auto light onPress={exportData}>
                   <AiFillFileExcel color="green" size={20} />
                 </Button>
               </Tooltip>
+
             </Gr>
             <Gr>
               <Tooltip content="Agregar Item" color="primary" placement="right">
-                <Button auto light onClick={() => setVisible(true)}>
+                <Button auto light onPress={() => setVisible(true)}>
                   <AiOutlinePlusCircle color="green" size={20} />
                 </Button>
               </Tooltip>
@@ -154,48 +195,33 @@ export default function Home() {
             </Gr>
           </Gr.Container>
         </Grid.Row>
+
+
         <Grid.Row>
           <Grid.Column width={16}>
-            <Table
-              aria-label="Example table with custom cells"
-              css={{
-                height: "auto",
-                minWidth: "100%",
-              }}
-              selectionMode="none"
-            >
+            <Table celled>
               <Table.Header>
-                <Table.Column
-                >
-                  Item
-                </Table.Column>
-                <Table.Column
-                >
-                  Descripcion
-                </Table.Column>
-                <Table.Column
-                >
-                  Organización
-                </Table.Column>
-                <Table.Column
-                >
-                  Class
-                </Table.Column>
-                <Table.Column
-                >
-                  Unidad de medida
-                </Table.Column>
+                <Table.Row>
+                  <Table.HeaderCell>Item</Table.HeaderCell>
+                  <Table.HeaderCell>Descripción</Table.HeaderCell>
+                  <Table.HeaderCell>Organización</Table.HeaderCell>
+                  <Table.HeaderCell>Class</Table.HeaderCell>
+                  <Table.HeaderCell>Unidad de medida</Table.HeaderCell>
+                </Table.Row>
               </Table.Header>
-              <Table.Body items={dataTable}>
-                {(x) => (
+
+              <Table.Body>
+                {dataTable.map((x) => (
                   <Table.Row key={x.INVENTORY_ITEM_ID}>
-                    <Table.Cell>{x.ITEM_NUMBER}</Table.Cell>
+                    <Table.Cell>
+                      <Link href={`item/${x.ITEM_NUMBER}`}>{x.ITEM_NUMBER}</Link>
+                    </Table.Cell>
                     <Table.Cell>{x.DESCRIPTION}</Table.Cell>
                     <Table.Cell>{x.ORGANIZATION_NAME}</Table.Cell>
-                    <Table.Cell>clase buscar</Table.Cell>
-                    <Table.Cell>{x.CURRENT_PHASE_CODE}</Table.Cell>
+                    <Table.Cell>None</Table.Cell>
+                    <Table.Cell>{x.INVENTORY_ITEM_STATUS_CODE}</Table.Cell>
                   </Table.Row>
-                )}
+                ))}
               </Table.Body>
             </Table>
           </Grid.Column>
