@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react"
+import { InferGetServerSidePropsType } from 'next'
+import { GetServerSideProps } from 'next'
 import Head from 'next/head';
 import Link from 'next/link'
 import { Input, Button, Text, Tooltip, Grid as Gr, Loading } from "@nextui-org/react";
@@ -10,8 +12,10 @@ import CreateItem from "@components/CreateItem";
 import { createApi } from "service/rest";
 import { exportXlsx } from "utils"
 import toast from 'react-hot-toast';
+import { env } from "process";
 
-export default function Home() {
+
+export default function Home({ urlFusion }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [visible, setVisible] = useState(false);
   const [dataClassItem, setDataClassItem] = useState<any>([]);
   const [clientApi, setClientApi] = useState<any>(null)
@@ -114,7 +118,7 @@ export default function Home() {
                     onChange={handlerChange} />
                 </Grid.Column>
                 <Grid.Column width={7}>
-                  <Input clearable bordered labelPlaceholder="Keyword" size="lg" fullWidth />
+                  <Input clearable bordered labelPlaceholder="Keyword" size="lg" disabled fullWidth />
                 </Grid.Column>
               </Grid.Row>
               <Grid.Row>
@@ -198,7 +202,7 @@ export default function Home() {
 
 
         <Grid.Row>
-          <Grid.Column width={16}>
+          <Grid.Column width={15}>
             <Table celled>
               <Table.Header>
                 <Table.Row>
@@ -214,12 +218,12 @@ export default function Home() {
                 {dataTable.map((x) => (
                   <Table.Row key={x.INVENTORY_ITEM_ID}>
                     <Table.Cell>
-                      <Link href={`item/${x.ITEM_NUMBER}`}>{x.ITEM_NUMBER}</Link>
+                      <Link href={`item/${x.ITEM_NUMBER}?org=${x.ORGANIZATION_NAME}`}>{x.ITEM_NUMBER}</Link>
                     </Table.Cell>
                     <Table.Cell>{x.DESCRIPTION}</Table.Cell>
                     <Table.Cell>{x.ORGANIZATION_NAME}</Table.Cell>
                     <Table.Cell>None</Table.Cell>
-                    <Table.Cell>{x.INVENTORY_ITEM_STATUS_CODE}</Table.Cell>
+                    <Table.Cell>{x.PRIMARY_UOM_CODE}</Table.Cell>
                   </Table.Row>
                 ))}
               </Table.Body>
@@ -236,4 +240,12 @@ export default function Home() {
       />
     </>
   )
+}
+
+export const getServerSideProps = () => {
+  return {
+    props: {
+      urlFusion: process.env.NEXT_PRIVATE_ERP_URL ?? ""
+    },
+  }
 }

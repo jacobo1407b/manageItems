@@ -12,21 +12,19 @@ type ParamReport = {
     value: string
 }
 export function createParams(params: Array<ParamReport>) {
-    let parameterNameValues: any = [];
+    let item: any = [];
+
     params.map((x) => {
-        return parameterNameValues.push({
-            item: {
-                UIType: "Text",
-                dataType: "Text",
-                name: x.name,
-                values: {
-                    item: x.value
-                }
+        return item.push({
+            UIType: "Text",
+            dataType: "Text",
+            name: x.name,
+            values: {
+                item: x.value
             }
         })
     });
-
-    return parameterNameValues;
+    return item
 }
 
 export function parseJson(xml: string): Promise<any> {

@@ -1,0 +1,24 @@
+CAR4DRSDN
+
+
+/fscmRestApi/resources/11.13.18.05/itemsV2                             -POST
+/fscmRestApi/resources/11.13.18.05/itemsV2                             -GET
+/fscmRestApi/resources/11.13.18.05/itemsV2/{itemsV2UniqID}             -UPDATE
+
+
+
+/fscmRestApi/resources/11.13.18.05/itemsV2/{itemsV2UniqID}/child/ItemAttachment      POST
+/fscmRestApi/resources/11.13.18.05/itemsV2/{itemsV2UniqID}/child/ItemAttachment/{ItemAttachmentUniqID}          UPDATE
+/fscmRestApi/resources/11.13.18.05/itemsV2/{itemsV2UniqID}/child/ItemAttachment/{ItemAttachmentUniqID}          DELETE
+
+
+
+
+
+#{EndPointProvider.externalEndpointByModuleShortName['OIC_EXTENTION']}/rt/GAM_EXPORTACIONES/live/webApps/exportaciones/?P_GET_USER_NAME=#{securityContext.userName}
+rt/GAM_EXPORTACIONES/live/webApps/exportaciones/?P_GET_USER_NAME=254220
+
+GAM_SCM_COM_Modelo_Datos
+
+/Custom/Integracion/SCM/GAM_SCM_Compras/GAM_SCM_COM_Generales/
+GAM_SACM_COM_Correos_Proceso_Lista_Precios_RPT.xdo

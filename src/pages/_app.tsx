@@ -16,14 +16,14 @@ const theme = createTheme({
 export default function App({ Component, pageProps }: AppProps) {
 
   return (
-    <>
+    <SSRProvider>
       <NextUIProvider theme={theme}>
         <div className='layout-jhm'>
           <Component {...pageProps} />
         </div>
       </NextUIProvider>
-      <Toaster  containerClassName="toast-container" />
-    </>
+      <Toaster containerClassName="toast-container" />
+    </SSRProvider>
 
   )
 

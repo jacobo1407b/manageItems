@@ -1,17 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, FunctionComponent, useEffect } from 'react';
+import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { Grid } from "semantic-ui-react";
-import { Image, Text, Textarea, Table, Button, Tooltip, Grid as Gr,Loading } from "@nextui-org/react";
+import { Image, Text, Textarea, Table, Button, Tooltip, Grid as Gr, Loading } from "@nextui-org/react";
 import { AiOutlinePlusCircle, AiOutlineCloseCircle, AiFillSave } from "react-icons/ai";
 import ModalBasic from '@components/Modal';
 import UploadFile from '@components/UploadFile';
+import { createApi } from "service/rest";
+import { getChildV2 } from 'service/rest';
 
-const Item = () => {
+
+interface iTem {
+    itemData: iItems
+    hash: string,
+    operation: string
+}
+
+const Item: FunctionComponent<iTem> = ({ hash, itemData, operation }) => {
+
+    const router = useRouter()
+
     const [visible, setVisible] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [dataItem, setDataItem] = useState<iItems>();
+    const [loadAttach, setLoadAttach] = useState(true);
+    const [attachments, setAttachments] = useState<Array<Attachment>>()
+
+    useEffect(() => {
+        setDataItem(itemData);
+        if (itemData.INVENTORY_ITEM_ID) {
+            (async () => {
+                let clientRest: any = createApi("/api");
+                setAttachments(await clientRest.getattachmet(itemData.INVENTORY_ITEM_ID, itemData.ORG_ID))
+                setLoadAttach(false);
+            })()
+        }
+
+    }, [itemData])
+
 
     function openModal() {
         setVisible(true);
+
     }
     return (
         <>
@@ -28,13 +58,14 @@ const Item = () => {
                             color="success"
                             icon={loading ? null : <AiFillSave />}
                             auto>
-                                {loading ? <Loading type="points" color="currentColor" size="sm" /> : "Guardar"}
+                            {loading ? <Loading type="points" color="currentColor" size="sm" /> : "Guardar"}
                         </Button>
                     </Grid.Column>
                     <Grid.Column width={2}>
                         <Button
                             color="error"
                             icon={<AiOutlineCloseCircle />}
+                            onPress={() => router.back()}
                             auto>
                             Cancelar
                         </Button>
@@ -42,13 +73,7 @@ const Item = () => {
                 </Grid.Row>
                 <Grid.Row>
                     <Grid.Column width={6}>
-                        <Image
-                            width={320}
-                            height={180}
-                            src="https://github.com/nextui-org/nextui/blob/next/apps/docs/public/nextui-banner.jpeg?raw=true"
-                            alt="Default Image"
-                            objectFit="cover"
-                        />
+                        carrousel image
                     </Grid.Column>
                     <Grid.Column width={10}>
                         <Grid >
@@ -56,13 +81,15 @@ const Item = () => {
                                 <Grid>
                                     <Grid.Row columns={2}>
                                         <Grid.Column width={5}><Text h3>Item</Text></Grid.Column>
-                                        <Grid.Column width={10}><Text>23GTY</Text></Grid.Column>
+                                        <Grid.Column width={10}><Text>{dataItem?.ITEM_NUMBER}</Text></Grid.Column>
                                     </Grid.Row>
                                     <Grid.Row columns={2}>
                                         <Grid.Column width={5}><Text h3>Descripción</Text></Grid.Column>
                                         <Grid.Column width={10}>
                                             <Textarea
                                                 bordered
+                                                //value={dataItem?.DESCRIPTION}
+                                                defaultValue={dataItem?.DESCRIPTION}
                                                 color="secondary"
                                                 labelPlaceholder="Descripción"
                                             />
@@ -70,15 +97,15 @@ const Item = () => {
                                     </Grid.Row>
                                     <Grid.Row columns={2}>
                                         <Grid.Column width={5}><Text h3>Item class</Text></Grid.Column>
-                                        <Grid.Column width={10}>Commisariato</Grid.Column>
+                                        <Grid.Column width={10}>{dataItem?.ITEM_CLASS}</Grid.Column>
                                     </Grid.Row>
                                     <Grid.Row columns={2}>
                                         <Grid.Column width={5}><Text h3>Aproval Status</Text></Grid.Column>
-                                        <Grid.Column width={10}>Aproved</Grid.Column>
+                                        <Grid.Column width={10}>{dataItem?.APPROVAL_STATUS}</Grid.Column>
                                     </Grid.Row>
                                     <Grid.Row columns={2}>
                                         <Grid.Column width={5}><Text h3>Creado por</Text></Grid.Column>
-                                        <Grid.Column width={10}>yo@test.com</Grid.Column>
+                                        <Grid.Column width={10}>{dataItem?.CREATED_BY}</Grid.Column>
                                     </Grid.Row>
                                 </Grid>
                             </Grid.Column>
@@ -86,27 +113,27 @@ const Item = () => {
                                 <Grid>
                                     <Grid.Row columns={2}>
                                         <Grid.Column width={5}><Text h3>Item status</Text></Grid.Column>
-                                        <Grid.Column width={10}><Text>selector</Text></Grid.Column>
+                                        <Grid.Column width={10}><Text>{dataItem?.INVENTORY_ITEM_STATUS_CODE}</Text></Grid.Column>
                                     </Grid.Row>
                                     <Grid.Row columns={2}>
                                         <Grid.Column width={5}><Text h3>Clico de vida</Text></Grid.Column>
-                                        <Grid.Column width={10}><Text>23GTY</Text></Grid.Column>
+                                        <Grid.Column width={10}><Text>{dataItem?.LIFE_CYCLE}</Text></Grid.Column>
                                     </Grid.Row>
                                     <Grid.Row columns={2}>
                                         <Grid.Column width={5}><Text h3>User item type</Text></Grid.Column>
-                                        <Grid.Column width={10}><Text>Selector</Text></Grid.Column>
+                                        <Grid.Column width={10}><Text>{dataItem?.ITEM_TYPE}</Text></Grid.Column>
                                     </Grid.Row>
                                     <Grid.Row columns={2}>
                                         <Grid.Column width={5}><Text h3>Pack type</Text></Grid.Column>
-                                        <Grid.Column width={10}><Text>Selector</Text></Grid.Column>
+                                        <Grid.Column width={10}><Text>{dataItem?.PACK_TYPE}</Text></Grid.Column>
                                     </Grid.Row>
                                     <Grid.Row columns={2}>
                                         <Grid.Column width={5}><Text h3>Revision</Text></Grid.Column>
-                                        <Grid.Column width={10}><Text>0</Text></Grid.Column>
+                                        <Grid.Column width={10}><Text>{dataItem?.REVISION}</Text></Grid.Column>
                                     </Grid.Row>
                                     <Grid.Row columns={2}>
                                         <Grid.Column width={5}><Text h3>Feche creación</Text></Grid.Column>
-                                        <Grid.Column width={10}><Text>2023-12-12</Text></Grid.Column>
+                                        <Grid.Column width={10}><Text>{dataItem?.CREATION_DATE}</Text></Grid.Column>
                                     </Grid.Row>
                                 </Grid>
                             </Grid.Column>
@@ -144,7 +171,7 @@ const Item = () => {
                             <Table.Header>
                                 <Table.Column
                                 >
-                                    Titulo
+                                    Titulos
                                 </Table.Column>
                                 <Table.Column
                                 >
@@ -184,3 +211,36 @@ const Item = () => {
 }
 
 export default Item
+
+
+export const getServerSideProps = async (ctx: any) => {
+    const { org, item } = ctx.query
+    let hasChild: string = "";
+    let data = await getChildV2(org, item);
+    if (data) {
+        let child = data.links[0].href.split("/")
+        hasChild = child[child.length - 1]
+    }
+    let objectView = {
+        ITEM_NUMBER: item,
+        DESCRIPTION: data?.ItemDescription ?? "",
+        ITEM_CLASS: data?.ItemClass ?? "",
+        APPROVAL_STATUS: data?.ApprovalStatusValue ?? "",
+        CREATED_BY: data?.CreatedBy ?? "",
+        INVENTORY_ITEM_STATUS_CODE: data?.ItemStatusValue ?? "",
+        LIFE_CYCLE: data?.LifecyclePhaseValue ?? "",
+        ITEM_TYPE: data?.UserItemTypeValue ?? "",
+        PACK_TYPE: data?.PackTypeValue ?? "",
+        REVISION: 0,
+        CREATION_DATE: data?.CreationDateTime ?? "",
+        INVENTORY_ITEM_ID: data?.ItemId ?? "",
+        ORG_ID: data?.OrganizationId ?? ""
+    }
+    return {
+        props: {
+            itemData: objectView,
+            hash: hasChild,
+            operation: hasChild ? "UPDATE" : "CREATE"
+        },
+    }
+}

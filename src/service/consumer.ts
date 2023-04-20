@@ -9,7 +9,9 @@ export default function consumeReport(client: any, reportPath: string, params: a
     let args = {
         reportRequest: {
             attributeFormat: 'xml', reportAbsolutePath: reportPath, sizeOfDataChunkDownload: "-1",
-            parameterNameValues: params
+            parameterNameValues: {
+                item: params
+            }
         }
     }
 
@@ -24,3 +26,4 @@ export default function consumeReport(client: any, reportPath: string, params: a
         });
     })
 }
+//2064
